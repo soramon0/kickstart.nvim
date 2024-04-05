@@ -42,7 +42,7 @@ vim.opt.smartindent = true
 vim.opt.undofile = true
 
 -- You should probably create a new line when you reach this column color
-vim.opt.colorcolumn = '120'
+vim.opt.colorcolumn = '100'
 
 -- Tab size 2
 vim.opt.tabstop = 2

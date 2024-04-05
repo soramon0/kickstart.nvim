@@ -2,7 +2,7 @@
 --  See `:help vim.keymap.set()`
 
 -- Open Explorer
-vim.keymap.set('n', '<leader>fe', vim.cmd.Ex)
+-- vim.keymap.set('n', '<leader>fe', vim.cmd.Ex)
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
