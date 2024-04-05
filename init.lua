@@ -22,7 +22,7 @@
 
 --]]
 
-require 'custom.core'
-require 'custom.lazy'
+require 'sora.core'
+require 'sora.lazy'
 
 

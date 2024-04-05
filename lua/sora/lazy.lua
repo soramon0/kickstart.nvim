@@ -17,7 +17,7 @@ vim.opt.rtp:prepend(lazypath)
 --  To update plugins you can run
 --    :Lazy update
 --
-require('lazy').setup({ { import = 'custom.plugins' }, { import = 'custom.plugins.lsp' } }, {
+require('lazy').setup({ { import = 'sora.plugins' }, { import = 'sora.plugins.lsp' } }, {
   checker = {
     enabled = true,
     notify = false,
