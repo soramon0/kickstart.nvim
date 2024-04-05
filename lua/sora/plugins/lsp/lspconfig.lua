@@ -140,6 +140,7 @@ return {
       pyright = {},
       rust_analyzer = {},
       prettierd = {},
+      svelte = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
       -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -148,7 +149,11 @@ return {
       -- But for many setups, the LSP (`tsserver`) will work just fine
       tsserver = {},
       --
-
+      markdownlint = {},
+      eslint_d = {},
+      hadolint = {}, -- dockerfile linter
+      vale = {}, -- text linter
+      jsonlint = {},
       lua_ls = {
         -- cmd = {...},
         -- filetypes = { ...},
