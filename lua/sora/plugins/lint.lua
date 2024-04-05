@@ -17,6 +17,7 @@ return {
       lint.linters_by_ft['typescript'] = { 'eslint_d' }
       lint.linters_by_ft['typescriptreact'] = { 'eslint_d' }
       lint.linters_by_ft['svelte'] = { 'eslint_d' }
+      lint.linters_by_ft['vue'] = { 'eslint_d' }
       --
       -- However, note that this will enable a set of default linters,
       -- which will cause errors unless these tools are available:
