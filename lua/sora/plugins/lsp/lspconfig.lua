@@ -140,6 +140,7 @@ return {
       pyright = {},
       rust_analyzer = {},
       prettierd = {},
+      prettier = {},
       svelte = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
