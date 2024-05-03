@@ -118,6 +118,12 @@ return {
       end,
     })
 
+    -- Add Go Templ support
+    -- https://github.com/vrischmann/tree-sitter-templ
+    vim.filetype.add {
+      extension = { templ = 'templ' },
+    }
+
     -- LSP servers and clients are able to communicate to each other what features they support.
     --  By default, Neovim doesn't support everything that is in the LSP specification.
     --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -155,6 +161,14 @@ return {
       hadolint = {}, -- dockerfile linter
       vale = {}, -- text linter
       jsonlint = {},
+      templ = {},
+      html = {
+        filetypes = { 'html', 'templ' },
+      },
+      tailwindcss = {
+        filetypes = { 'templ', 'astro', 'javascript', 'typescript', 'react' },
+        init_options = { userLanguages = { templ = 'html' } },
+      },
       lua_ls = {
         -- cmd = {...},
         -- filetypes = { ...},
