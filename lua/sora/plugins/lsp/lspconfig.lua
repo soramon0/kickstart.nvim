@@ -153,8 +153,7 @@ return {
       -- Some languages (like typescript) have entire language plugins that can be useful:
       --    https://github.com/pmizio/typescript-tools.nvim
       --
-      -- But for many setups, the LSP (`tsserver`) will work just fine
-      tsserver = {},
+      ts_ls = {},
       --
       markdownlint = {},
       eslint_d = {},
@@ -166,7 +165,7 @@ return {
         filetypes = { 'html', 'templ' },
       },
       tailwindcss = {
-        filetypes = { 'templ', 'astro', 'javascript', 'typescript', 'react' },
+        -- filetypes = { 'templ', 'astro', 'javascript', 'typescript', 'react' },
         init_options = { userLanguages = { templ = 'html' } },
       },
       lua_ls = {

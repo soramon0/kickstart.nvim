@@ -53,3 +53,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- vim-powered terminal
+-- link: https://gist.github.com/mahemoff/8967b5de067cffc67cec174cb3a9f49d
+vim.keymap.set('n', '<leader>t', '<cmd>:tab terminal<CR>', { desc = 'Open terminal in new tab' })
+-- vim-powered terminal in new tab
