@@ -1,8 +1,21 @@
 return {
+  -- {
+  --   'rebelot/kanagawa.nvim',
+  --   init = function()
+  --     vim.cmd.colorscheme 'kanagawa-dragon'
+  --   end,
+  -- },
   {
-    'rebelot/kanagawa.nvim',
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+    flavor = 'mocha',
+    background = {
+      light = 'latte',
+      dark = 'mocha',
+    },
     init = function()
-      vim.cmd.colorscheme 'kanagawa-dragon'
+      vim.cmd.colorscheme 'catppuccin-mocha'
     end,
   },
   -- {
