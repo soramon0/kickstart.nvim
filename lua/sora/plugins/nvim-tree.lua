@@ -17,13 +17,17 @@ return {
           enable = true,
         },
         icons = {
-          glyphs = {
-            folder = {
-              arrow_closed = '', -- arrow when folder is closed
-              arrow_open = '', -- arrow when folder is open
-            },
-          },
+          -- glyphs = {
+          --   folder = {
+          --     arrow_closed = '', -- arrow when folder is closed
+          --     arrow_open = '', -- arrow when folder is open
+          --   },
+          -- },
         },
+        root_folder_label = function(path)
+          return vim.fn.fnamemodify(path, ':p:h:t')
+          -- or use ":p:h:t" to get just the folder name
+        end,
       },
     }
 
