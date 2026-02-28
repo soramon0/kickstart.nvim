@@ -148,6 +148,7 @@ return {
       prettierd = {},
       prettier = {},
       svelte = {},
+      zls = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
       -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -175,11 +176,22 @@ return {
         -- capabilities = {},
         settings = {
           Lua = {
+            runtime = {
+              version = 'LuaJIT',
+            },
             completion = {
               callSnippet = 'Replace',
             },
-            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-            -- diagnostics = { disable = { 'missing-fields' } },
+            diagnostics = {
+              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+              -- disable = { 'missing-fields' },
+              -- Get the language server to recognize the `vim` global
+              globals = { 'vim' },
+            },
+            workspace = {
+              -- Make the server aware of Neovim runtime files
+              library = vim.api.nvim_get_runtime_file('lua', true),
+            },
           },
         },
       },
