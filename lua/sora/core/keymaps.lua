@@ -4,6 +4,10 @@
 -- Open Explorer
 -- vim.keymap.set('n', '<leader>fe', vim.cmd.Ex)
 
+-- sourcing single file
+print 'source me'
+vim.keymap.set('n', '<leader>sx', '<cmd>source %<CR>', { desc = 'source current file' })
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
