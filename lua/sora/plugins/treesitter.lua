@@ -18,6 +18,7 @@ return {
       'html',
       'lua',
       'markdown',
+      'make',
       'vim',
       'vimdoc',
       'json',
