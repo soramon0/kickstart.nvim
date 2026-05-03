@@ -3,17 +3,17 @@ return {
   'neovim/nvim-lspconfig',
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
-    'williamboman/mason.nvim',
-    'williamboman/mason-lspconfig.nvim',
+    { 'mason-org/mason.nvim', opts = {} },
+    'mason-org/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
 
     -- Useful status updates for LSP.
     -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
     { 'j-hui/fidget.nvim', opts = {} },
 
-    -- `neodev` configures Lua LSP for your Neovim config, runtime and plugins
+    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
     -- used for completion, annotations and signatures of Neovim apis
-    { 'folke/lazydev.nvim', opts = {} },
+    { 'folke/lazydev.nvim', ft = 'lua', opts = {} },
   },
   config = function()
     -- Brief aside: **What is LSP?**
@@ -104,15 +104,28 @@ return {
         --
         -- When you move your cursor, the highlights will be cleared (the second autocommand).
         local client = vim.lsp.get_client_by_id(event.data.client_id)
-        if client and client.server_capabilities.documentHighlightProvider then
+        if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
           vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
             buffer = event.buf,
+            group = highlight_augroup,
             callback = vim.lsp.buf.document_highlight,
           })
 
           vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
             buffer = event.buf,
+            group = highlight_augroup,
             callback = vim.lsp.buf.clear_references,
+          })
+
+          -- Clean up highlight autocmds when the LSP detaches, otherwise they
+          -- linger and fire against a dead client.
+          vim.api.nvim_create_autocmd('LspDetach', {
+            group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
+            callback = function(event2)
+              vim.lsp.buf.clear_references()
+              vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
+            end,
           })
         end
       end,
@@ -129,7 +142,14 @@ return {
     --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
     --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
     local capabilities = vim.lsp.protocol.make_client_capabilities()
-    capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+    local has_cmp_lsp, cmp_lsp = pcall(require, 'cmp_nvim_lsp')
+    if has_cmp_lsp then
+      capabilities = vim.tbl_deep_extend('force', capabilities, cmp_lsp.default_capabilities())
+    end
+
+    -- Broadcast our enhanced capabilities to every server. Per-server configs
+    -- below are merged on top of this via vim.lsp.config().
+    vim.lsp.config('*', { capabilities = capabilities })
 
     -- Enable the following language servers
     --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -145,8 +165,6 @@ return {
       gopls = {},
       pyright = {},
       rust_analyzer = {},
-      prettierd = {},
-      prettier = {},
       svelte = {},
       zls = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -155,13 +173,6 @@ return {
       --    https://github.com/pmizio/typescript-tools.nvim
       --
       ts_ls = {},
-      -- tsserver = {},
-      --
-      markdownlint = {},
-      eslint_d = {},
-      hadolint = {}, -- dockerfile linter
-      vale = {}, -- text linter
-      jsonlint = {},
       templ = {},
       html = {
         filetypes = { 'html', 'templ' },
@@ -176,12 +187,8 @@ return {
         -- capabilities = {},
         settings = {
           Lua = {
-            runtime = {
-              version = 'LuaJIT',
-            },
-            completion = {
-              callSnippet = 'Replace',
-            },
+            runtime = { version = 'LuaJIT' },
+            completion = { callSnippet = 'Replace' },
             diagnostics = {
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- disable = { 'missing-fields' },
@@ -191,10 +198,32 @@ return {
             workspace = {
               -- Make the server aware of Neovim runtime files
               library = vim.api.nvim_get_runtime_file('lua', true),
+              checkThirdParty = false,
             },
           },
         },
       },
+    }
+
+    -- Register each server's config so vim.lsp.enable() (called by
+    -- mason-lspconfig below) picks them up. The new vim.lsp.config() API
+    -- replaces the old `require('lspconfig').<server>.setup(...)` pattern.
+    for name, cfg in pairs(servers) do
+      vim.lsp.config(name, cfg)
+    end
+
+    -- Other tooling to install via Mason that is NOT a language server
+    -- (formatters, linters, DAP adapters). These don't go through
+    -- mason-lspconfig because they don't speak LSP.
+    local tools = {
+      'stylua', -- Used to format Lua code
+      'prettierd',
+      'prettier',
+      'markdownlint',
+      'eslint_d',
+      'hadolint', -- dockerfile linter
+      'vale', -- prose linter
+      'jsonlint',
     }
 
     -- Ensure the servers and tools above are installed
@@ -203,28 +232,17 @@ return {
     --    :Mason
     --
     --  You can press `g?` for help in this menu.
-    require('mason').setup()
+    require('mason-tool-installer').setup {
+      ensure_installed = vim.list_extend(vim.tbl_keys(servers), tools),
+    }
 
-    -- You can add other tools here that you want Mason to install
-    -- for you, so that they are available from within Neovim.
-    local ensure_installed = vim.tbl_keys(servers or {})
-    vim.list_extend(ensure_installed, {
-      'stylua', -- Used to format Lua code
-      'tailwindcss-language-server',
-    })
-    require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
+    -- NOTE: mason-lspconfig 2.0+ removed `handlers` / `setup_handlers`. It now
+    -- just calls vim.lsp.enable() for every installed server, which picks up
+    -- the per-server config registered above via vim.lsp.config(). See
+    -- :help mason-lspconfig-automatic-enable for the `automatic_enable` opts.
     require('mason-lspconfig').setup {
-      handlers = {
-        function(server_name)
-          local server = servers[server_name] or {}
-          -- This handles overriding only values explicitly passed
-          -- by the server configuration above. Useful when disabling
-          -- certain features of an LSP (for example, turning off formatting for tsserver)
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-          require('lspconfig')[server_name].setup(server)
-        end,
-      },
+      ensure_installed = {}, -- handled by mason-tool-installer above
+      automatic_enable = true,
     }
   end,
 }
